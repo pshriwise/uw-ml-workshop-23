@@ -72,7 +72,7 @@ def get_model_predictions(x_data: List[float], m: float, c: float) -> List[float
     """
     linear_preds = []
     for x in x_data:
-        y_pred = None # FIXME: get a model prediction from each x value
+        y_pred = m*x + c
         
         #add the result to the linear_data list
         linear_preds.append(y_pred)
@@ -138,7 +138,7 @@ def measure_error(y: List[float], y_pred: List[float]) -> float:
     assert len(y)==len(y_pred)
     err_total = 0
     for i in range(0,len(y)):
-        err_total = None # FIXME: add up the squared error for each observation
+        err_total += (y[i] - y_pred[i])**2
 
     err = math.sqrt(err_total / len(y))
     return err
@@ -181,15 +181,12 @@ def process_life_expectancy_data(
     x_train = list(range(min_date_train, max_date_train + 1))
 
     # calculate line of best fit
-    # FIXME: Uncomment the below line of code and fill in the blank
-#     m, c = _______([x_train, y_train])
+    m, c = least_squares([x_train, y_train])
 
     # Get model predictions for train data. 
-    # FIXME: Uncomment the below line of code and fill in the blank 
-#     y_train_pred = _______(x_train, m, c)
+    y_train_pred = get_model_predictions(x_train, m, c)
     
-    # FIXME: Uncomment the below line of code and fill in the blank
-#     train_error = _______(y_train, y_train_pred)
+    train_error = measure_error(y_train, y_train_pred)
 
     print("Train RMSE =", format(train_error,'.5f'))
     if test_data_range is None:
