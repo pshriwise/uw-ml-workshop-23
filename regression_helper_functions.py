@@ -283,8 +283,7 @@ def process_life_expt_gdp_data(gdp_file: str, life_expectancy_file: str, year: s
     data = read_data(gdp_file, life_expectancy_file, year)
 
     gdp = data["GDP"].tolist()
-    # FIXME: uncomment the below line and fill in the blank
-    #    log_gdp = data["GDP"].apply(____).tolist()
+    log_gdp = data["GDP"].apply(math.log).tolist()
     
     life_exp = data["Life Expectancy"].tolist()
 
@@ -297,8 +296,7 @@ def process_life_expt_gdp_data(gdp_file: str, life_expectancy_file: str, year: s
     for x in life_exp:
         log_gdp_pred = m * x + c
         log_gdp_preds.append(log_gdp_pred)
-        # FIXME: Uncomment the below line of code and fill in the blank
-#         gdp_pred = _____(log_gdp_pred)
+        gdp_pred = math.exp(log_gdp_pred)
 
         gdp_preds.append(gdp_pred)
 
@@ -337,7 +335,7 @@ def process_life_expectancy_data_sklearn(filename, country, train_data_range, te
     y_train = np.array(y_train).reshape(-1, 1)
 
     # OLD VERSION: m, c = least_squares([x_train, y_train])
-    regression = None # FIXME: calculate line of best fit and extract m and c using sklearn. 
+    regression = skl_lin.LinearRegression().fit(x_train, y_train)
     
     # extract slope (m)
     # The coef_ attribute stores the coefficients (slopes) of the linear model for each feature. It is a 2D array where each row corresponds to a target variable (in the case of multi-output regression) and each column corresponds to a feature. For simple linear regression with one feature, you typically have one row and one column, so you access the slope as coef_[0][0].
@@ -351,10 +349,10 @@ def process_life_expectancy_data_sklearn(filename, country, train_data_range, te
     print("m =", format(m,'.5f'), "c =", format(c,'.5f'))
 
     # OLD VERSION: y_train_pred = get_model_predictions(x_train, m, c)
-    y_train_pred = None # FIXME: get model predictions for test data. 
+    y_train_pred = regression.predict(x_train)
     
     # OLD VERSION: train_error = measure_error(y_train, y_train_pred) 
-    train_error = None # FIXME: calculate model train set error. 
+    train_error = skl_metrics.mean_squared_error(y_train, y_train_pred, squared=False)
 
     print("Train RMSE =", format(train_error,'.5f'))
     if test_data_range is None:
@@ -433,21 +431,21 @@ def process_life_expectancy_data_poly(degree: int,
     
     # Generate a new feature matrix consisting of all polynomial combinations of the features with degree less than or equal to the specified degree. For example, if an input sample is two dimensional and of the form [a, b], the degree-2 polynomial features are [1, a, b, a^2, ab, b^2]. 
     # for a 5-degree polynomial applied to one feature (dates), we will get six new features: [1, x, x^2, x^3, x^4, x^5]
-    polynomial_features = None # FIXME: initialize polynomial features, [1, x, x^2, x^3, ...]
+    polynomial_features = skl_pre.PolynomialFeatures(degree=degree)
     
-    x_poly_train = None # FIXME:  apply polynomial transformation to training data
+    x_poly_train = polynomial_features.fit_transform(x_train) # FIXME:  apply polynomial transformation to training data
 
     print('x_train.shape', x_train.shape)
     print('x_poly_train.shape', x_poly_train.shape)
 
     # Calculate line of best fit using sklearn.
-    regression = None # fit regression model
+    regression = skl_lin.LinearRegression().fit(x_poly_train, y_train) # fit regression model
 
     # Get model predictions for test data
     y_train_pred = regression.predict(x_poly_train)
     
     # Calculate model train set error   
-    train_error = math.sqrt(skl_metrics.mean_squared_error(y_train, y_train_pred))
+    train_error = skl_metrics.mean_squared_error(y_train, y_train_pred, squared=False)
 
     print("Train RMSE =", format(train_error,'.5f'))
     if test_data_range is None:
